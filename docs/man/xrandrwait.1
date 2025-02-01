@@ -1,0 +1,159 @@
+.TH XRANDRWAIT 1 "February 1, 2025" "xrandrwait 0.1"
+
+.SH "NAME"
+xrandrwait \- Wait for a specific XrandR event
+
+
+.SH "SYNOPSIS"
+.B xrandrwait
+.RB [ \-hmq ]
+.RB [ \-e
+<event> ]
+.RB [ \-t
+<seconds> ]
+
+
+.SH "DESCRIPTION"
+.B xrandrwait
+waits for changes to the monitor configuration using X11's
+.BR Xrandr(3)
+extension. It is suitable for waiting for changes to the monitor
+configuration from shell scripts. It can either exit after the
+first event occurs, or run continually and report on events until
+it receives a signal.
+
+
+.SH "OUTPUT"
+.B xrandrwait
+will output event information on standard output and diagnostic
+output on standard error. Xrandrwait will emit one line per event,
+allowing shell scripts to with a read loop such as the following.
+
+.nf
+while read -r event; do
+  handle "$event"
+done < <(xrandrwait --monitor)
+.fi
+
+The output format depends on the event type, as described below.
+
+.TP
+.B XRROutputChangeNotifyEvent
+Events of this type contain the XID of the output, crtc, and mode, as
+well as the connection status. The format is
+
+.I XRROutputChangeNotifyEvent output=OUT crtc=CRT mode=MOD connection=CON
+
+where OUT, CRT, and MOD are hexadecimal XIDs and CON is 'Y' if the output
+is connected, 'N' if it is not connected, '?' if the connection status is
+unknown, or 'E' in case of an error.
+
+.TP
+.B XRRCrtcChangeNotifyEvent
+Events of this type contain the XID of the crtc, the position and resolution
+of the crtc, the XID of the mode, as well as the rotation and reflection.
+The format is
+
+.I XRRCrtcChangeNotifyEvent crtc=CRT res=WxH pos=XxY mode=MOD rotation=ROT reflection=REF
+
+where CRT and MOD are hexadecimal XIDs and W, H, X, and Y are integers
+describing the width, height, horizontal position, and vertical position
+of the crtc. ROT describes the rotation of the crtc in degrees, REF is 'X'
+if the crtc is mirrored along the X-axis, 'Y' if it is mirrored along the
+Y-axis, 'XY' if it is mirrored along both axes, '0' if it is not mirrored
+at all, and 'E' in case of an error.
+
+
+.SH "OPTIONS"
+.TP
+.B \-e, \-\-event <event>
+Specify an event that xrandrwait should wait for. Only one event can be
+specified at a time, but this option may be used more than one.
+
+.TP
+.B \-h, \-\-help
+Output a short message how to use xrandrwait.
+
+.TP
+.B \-m, \-\-monitor
+Run indefinitely and report on events, until a signal is received.
+
+.TP
+.B \-q, \-\-quiet
+Do not print event information
+
+.TP
+.B \-t, \-\-timeout <seconds>
+Make xrandrwait exit after <seconds> seconds if no event occurred.
+
+
+.SH "EVENTS"
+The following events are understood by xrandrwait.
+
+.TP
+.B crtc_change
+Corresponds to XRRCrtcChangeNotifyEvent messages
+
+.TP
+.B output_change
+Corresponds to XRROutputChangeNotifyEvent messages
+
+.TP
+.B screen_change
+Corresponds to XRRScreenChangeNotifyEvent messages
+
+
+.SH "EXIT STATUS"
+.TP
+.B 0
+The program executed successfully, and an event occurred that was being listened for.
+
+.TP
+.B 1
+The program executed successfully, but no events occurred that were being listened for.
+
+.TP
+.B 2
+An error occurred that was the result of invalid user input, such as invalid command
+line parameters.
+
+.TP
+.B Other non-zero values
+An error occurred during execution. Details were printed to standard error.
+
+
+.SH "EXAMPLES"
+
+.SS Example 1
+Wait for an XRROutputChangeNotifyEvent message
+
+.nf
+$ xrandrwait -e output_change
+.fi
+
+.SS Example 2
+Wait at most 10 seconds for any event type
+
+.nf
+$ xrandrwait -t 10
+.fi
+
+.SS Example 3
+Continuously handle events in a loop
+
+.nf
+while read -r event_type event_details; do
+  printf 'Received %s event\\n\\t%s\\n' "$event_type" "$event_details"
+done < <(xrandrwait --monitor)
+.fi
+
+
+.SH "AUTHORS"
+xrandrwait is written and maintained by Matthias Kruk <matthiaskruk@gmail.com>.
+
+The xrandrwait source code is located at:
+.I https://github.com/m10k/xrandrwait
+
+
+.SH "SEE ALSO"
+Xrandr(3), xrandr(1)

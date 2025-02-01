@@ -1,4 +1,4 @@
-DEPS = src
+DEPS = docs src
 OUTPUT = xrandrwait
 PHONY = $(DEPS) clean install uninstall
 
