@@ -315,11 +315,9 @@ static int handle_crtc_change_event(struct context *ctx, XRRCrtcChangeNotifyEven
 static int handle_events(struct context *ctx)
 {
 	XEvent event;
-	int err;
 	int handled;
 
 	handled = 0;
-	err = 0;
 
 	while (XEventsQueued(ctx->display, QueuedAfterFlush) > 0) {
 #if DEBUG
@@ -340,13 +338,13 @@ static int handle_events(struct context *ctx)
 			switch (((XRRNotifyEvent*)&event)->subtype) {
 			case RRNotify_OutputChange:
 				DBG(event_type = "RRNotify_OutputChange");
-				err = handle_output_change_event(ctx, (XRROutputChangeNotifyEvent*)&event);
+				handle_output_change_event(ctx, (XRROutputChangeNotifyEvent*)&event);
 				handled = 1;
 				break;
 				
 			case RRNotify_CrtcChange:
 				DBG(event_type = "RRNotify_CrtcChange");
-				err = handle_crtc_change_event(ctx, (XRRCrtcChangeNotifyEvent*)&event);
+				handle_crtc_change_event(ctx, (XRRCrtcChangeNotifyEvent*)&event);
 				handled = 1;
 				break;
 
@@ -369,7 +367,7 @@ static int handle_events(struct context *ctx)
 		running = 0;
 	}
 
-	return err;
+	return handled ? 0 : 1;
 }
 
 int main(int argc, char *argv[])
@@ -379,7 +377,7 @@ int main(int argc, char *argv[])
 	
 	if (parse_cmdline(argc, argv) != 0) {
 		DBG(fprintf(stderr, "Could not parse commandline\n"));
-		return 1;
+		return 2;
 	}
 
 	setup_signals();
@@ -398,7 +396,7 @@ int main(int argc, char *argv[])
 		DBG(fprintf(stderr, "Running\n"));
 		
 		while (running) {
-			handle_events(&ctx);
+			err = handle_events(&ctx);
 			nanosleep(&ts, NULL);
 		}
 		
