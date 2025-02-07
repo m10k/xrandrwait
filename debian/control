@@ -1,0 +1,16 @@
+Source: xrandrwait
+Priority: optional
+Maintainer: Matthias Kruk <m@m10k.eu>
+Build-Depends: debhelper (>= 9), make, coreutils, gcc, libxrandr-dev, libx11-dev
+Standards-Version: 3.9.8
+Section: x11
+Homepage: https://github.com/m10k/xrandr
+
+Package: xrandrwait
+Section: x11
+Architecture: any
+Depends: libc6, libxrandr2, libx11-6, ${shlibs:Depends}
+Description: Command-line utility to display XRandR events
+ A command-line program that waits for XRandR events and prints
+ them to standard output, enabling shell scripts to handle changes
+ in the display configuration.
