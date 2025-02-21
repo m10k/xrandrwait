@@ -234,7 +234,7 @@ static void setup_signals(void)
 static int context_init_xrr(struct context *ctx)
 {
 	int event_mask;
-	
+
 	if (!XRRQueryExtension(ctx->display,
 			       &ctx->event_base,
 			       &ctx->error_base)) {
@@ -248,7 +248,7 @@ static int context_init_xrr(struct context *ctx)
 	}
 
 	XRRSelectInput(ctx->display, ctx->root, event_mask);
-	
+
 	return 0;
 }
 
@@ -257,11 +257,11 @@ static int context_close(struct context *ctx)
 	if (!ctx) {
 		return -EINVAL;
 	}
-	
+
 	if (!ctx->display) {
 		return -EALREADY;
 	}
-	
+
 	XCloseDisplay(ctx->display);
 	memset(ctx, 0, sizeof(*ctx));
 
@@ -287,7 +287,7 @@ static int context_open(struct context *ctx)
 		DBG(fprintf(stderr, "Could not initialize XRandR extension\n"));
 		context_close(ctx);
 	}
-	
+
 	return err;
 }
 
@@ -296,6 +296,7 @@ static int handle_output_change_event(struct context *ctx, XRROutputChangeNotify
 	if (!quiet) {
 		printf("XRROutputChangeNotifyEvent output=0x%lx crtc=0x%lx mode=0x%lx connection=%s\n",
 		       event->output, event->crtc, event->mode, connection_name(event->connection));
+		fflush(stdout);
 	}
 
 	return 0;
@@ -307,6 +308,7 @@ static int handle_crtc_change_event(struct context *ctx, XRRCrtcChangeNotifyEven
 		printf("XRRCrtcChangeNotifyEvent crtc=0x%lx res=%dx%d pos=%dx%d mode=0x%lx rotation=%s reflection=%s\n",
 		       event->crtc, event->width, event->height, event->x, event->y, event->mode,
 		       rotation_name(event->rotation), reflection_name(event->rotation));
+		fflush(stdout);
 	}
 
 	return 0;
@@ -341,7 +343,7 @@ static int handle_events(struct context *ctx)
 				handle_output_change_event(ctx, (XRROutputChangeNotifyEvent*)&event);
 				handled = 1;
 				break;
-				
+
 			case RRNotify_CrtcChange:
 				DBG(event_type = "RRNotify_CrtcChange");
 				handle_crtc_change_event(ctx, (XRRCrtcChangeNotifyEvent*)&event);
@@ -374,7 +376,7 @@ int main(int argc, char *argv[])
 {
 	struct context ctx;
 	int err;
-	
+
 	if (parse_cmdline(argc, argv) != 0) {
 		DBG(fprintf(stderr, "Could not parse commandline\n"));
 		return 2;
@@ -394,14 +396,14 @@ int main(int argc, char *argv[])
 		running = 1;
 
 		DBG(fprintf(stderr, "Running\n"));
-		
+
 		while (running) {
 			err = handle_events(&ctx);
 			nanosleep(&ts, NULL);
 		}
-		
+
 		context_close(&ctx);
 	}
-	
+
 	return err;
 }
