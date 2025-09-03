@@ -4,7 +4,7 @@ Maintainer: Matthias Kruk <m@m10k.eu>
 Build-Depends: debhelper (>= 9), make, coreutils, gcc, libxrandr-dev, libx11-dev
 Standards-Version: 3.9.8
 Section: x11
-Homepage: https://github.com/m10k/xrandr
+Homepage: https://github.com/m10k/xrandrwait
 
 Package: xrandrwait
 Section: x11
